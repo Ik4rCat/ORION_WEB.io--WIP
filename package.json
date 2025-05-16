@@ -1,0 +1,20 @@
+{
+  "name": "orion-web",
+  "version": "1.0.0",
+  "description": "ORION - платформа для управления разработкой игр",
+  "main": "js/app.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"No build required for static files\" && exit 0"
+  },
+  "keywords": [
+    "game",
+    "development",
+    "management",
+    "tasks",
+    "kanban"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+} 

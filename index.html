@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORION - Управление разработкой игр</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <h1>ORION</h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" id="dashboardLink" class="active">Главная</a></li>
+                    <li><a href="#" id="projectsLink">Проекты</a></li>
+                    <li><a href="#" id="tasksLink">Задачи</a></li>
+                    <li><a href="#" id="notesLink">Заметки</a></li>
+                    <li><a href="#" id="gitLink">Git</a></li>
+                </ul>
+            </nav>
+            <div class="user-panel">
+                <button id="loginBtn" class="btn">Вход</button>
+                <button id="registerBtn" class="btn btn-primary">Регистрация</button>
+                <div class="user-profile" style="display: none;">
+                    <img src="img/default-avatar.svg" alt="User Avatar" class="avatar">
+                    <span class="username">Пользователь</span>
+                    <div class="dropdown">
+                        <a href="#" id="profileLink">Профиль</a>
+                        <a href="#" id="teamLink">Моя команда</a>
+                        <a href="#" id="settingsLink">Настройки</a>
+                        <a href="#" id="logoutLink">Выход</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div id="dashboard" class="section active">
+                <h2>Панель управления</h2>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Мои задачи</h3>
+                        <p>Активные задачи: <span id="activeTasksCount">0</span></p>
+                        <a href="#" class="btn btn-sm">Перейти к задачам</a>
+                    </div>
+                    <div class="card">
+                        <h3>Мои проекты</h3>
+                        <p>Активные проекты: <span id="activeProjectsCount">0</span></p>
+                        <a href="#" class="btn btn-sm">Перейти к проектам</a>
+                    </div>
+                    <div class="card">
+                        <h3>Последние заметки</h3>
+                        <ul id="recentNotes" class="list-simple">
+                            <li>Нет недавних заметок</li>
+                        </ul>
+                        <a href="#" class="btn btn-sm">Перейти к заметкам</a>
+                    </div>
+                    <div class="card">
+                        <h3>Git активность</h3>
+                        <ul id="recentCommits" class="list-simple">
+                            <li>Нет недавних коммитов</li>
+                        </ul>
+                        <a href="#" class="btn btn-sm">Перейти к Git</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="projects" class="section">
+                <h2>Проекты</h2>
+                <div class="action-bar">
+                    <button id="newProjectBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Новый проект</button>
+                    <div class="search-box">
+                        <input type="text" placeholder="Поиск проектов...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-options">
+                        <select id="projectFilter">
+                            <option value="all">Все проекты</option>
+                            <option value="active">Активные</option>
+                            <option value="completed">Завершенные</option>
+                            <option value="archived">Архивные</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="projects-grid" id="projectsGrid">
+                    <div class="project-card empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>У вас пока нет проектов</p>
+                        <button class="btn btn-primary">Создать первый проект</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tasks" class="section">
+                <h2>Задачи</h2>
+                <div class="action-bar">
+                    <button id="newTaskBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Новая задача</button>
+                    <div class="search-box">
+                        <input type="text" placeholder="Поиск задач...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-options">
+                        <select id="taskFilter">
+                            <option value="all">Все задачи</option>
+                            <option value="mine">Мои задачи</option>
+                            <option value="assigned">Назначенные мне</option>
+                            <option value="completed">Завершенные</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="kanban-board" id="taskBoard">
+                    <div class="kanban-column">
+                        <h3>Запланировано</h3>
+                        <div class="kanban-items" id="plannedTasks">
+                            <div class="empty-state">
+                                <p>Нет запланированных задач</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kanban-column">
+                        <h3>В работе</h3>
+                        <div class="kanban-items" id="inProgressTasks">
+                            <div class="empty-state">
+                                <p>Нет задач в работе</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kanban-column">
+                        <h3>Тестирование</h3>
+                        <div class="kanban-items" id="testingTasks">
+                            <div class="empty-state">
+                                <p>Нет задач на тестировании</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kanban-column">
+                        <h3>Завершено</h3>
+                        <div class="kanban-items" id="completedTasks">
+                            <div class="empty-state">
+                                <p>Нет завершенных задач</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="notes" class="section">
+                <h2>Заметки</h2>
+                <div class="notes-container">
+                    <div class="notes-sidebar">
+                        <div class="action-bar">
+                            <button id="newNoteBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Новая заметка</button>
+                            <div class="search-box">
+                                <input type="text" placeholder="Поиск заметок...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div class="notes-list" id="notesList">
+                            <div class="empty-state">
+                                <p>У вас пока нет заметок</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notes-editor">
+                        <div class="editor-toolbar">
+                            <button class="tool-btn"><i class="fas fa-bold"></i></button>
+                            <button class="tool-btn"><i class="fas fa-italic"></i></button>
+                            <button class="tool-btn"><i class="fas fa-list"></i></button>
+                            <button class="tool-btn"><i class="fas fa-link"></i></button>
+                            <button class="tool-btn"><i class="fas fa-image"></i></button>
+                            <button class="tool-btn"><i class="fas fa-code"></i></button>
+                            <button class="tool-btn"><i class="fas fa-diagram-project"></i></button>
+                        </div>
+                        <div id="noteEditor" class="editor-content" contenteditable="true">
+                            <p>Выберите или создайте заметку...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="git" class="section">
+                <h2>Git интеграция</h2>
+                <div class="git-container">
+                    <div class="git-sidebar">
+                        <div class="repo-selector">
+                            <select id="repoSelect">
+                                <option value="">Выберите репозиторий</option>
+                            </select>
+                            <button id="addRepoBtn" class="btn btn-sm"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="branch-list" id="branchList">
+                            <div class="empty-state">
+                                <p>Выберите репозиторий</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="git-main">
+                        <div class="action-bar">
+                            <button id="pullBtn" class="btn"><i class="fas fa-download"></i> Pull</button>
+                            <button id="pushBtn" class="btn"><i class="fas fa-upload"></i> Push</button>
+                            <button id="commitBtn" class="btn btn-primary"><i class="fas fa-code-commit"></i> Commit</button>
+                        </div>
+                        <div class="git-changes">
+                            <h3>Изменения</h3>
+                            <div id="changedFiles" class="file-list">
+                                <div class="empty-state">
+                                    <p>Нет изменений</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="git-history">
+                            <h3>История коммитов</h3>
+                            <div id="commitHistory" class="commit-list">
+                                <div class="empty-state">
+                                    <p>История коммитов пуста</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Модальные окна -->
+        <div id="loginModal" class="modal">        <div class="modal-content">            <span class="close">&times;</span>            <h2>Вход в систему</h2>            <form id="loginForm">                <div class="form-group">                    <label for="loginEmail">Email:</label>                    <input type="email" id="loginEmail" required>                </div>                <div class="form-group">                    <label for="loginPassword">Пароль:</label>                    <input type="password" id="loginPassword" required>                </div>                <button type="submit" class="btn btn-primary">Войти</button>            </form>            <div class="social-login">                <p>Или войдите через:</p>                <button id="githubLoginBtn" class="btn btn-social"><i class="fab fa-github"></i> GitHub</button>            </div>        </div>    </div>
+    
+        <div id="registerModal" class="modal">        <div class="modal-content">            <span class="close">&times;</span>            <h2>Регистрация</h2>            <form id="registerForm">                <div class="form-group">                    <label for="registerName">Имя:</label>                    <input type="text" id="registerName" required>                </div>                <div class="form-group">                    <label for="registerEmail">Email:</label>                    <input type="email" id="registerEmail" required>                </div>                <div class="form-group">                    <label for="registerPassword">Пароль:</label>                    <input type="password" id="registerPassword" required>                </div>                <div class="form-group">                    <label for="confirmPassword">Подтвердите пароль:</label>                    <input type="password" id="confirmPassword" required>                </div>                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>            </form>            <div class="social-login">                <p>Или зарегистрируйтесь через:</p>                <button id="githubRegisterBtn" class="btn btn-social"><i class="fab fa-github"></i> GitHub</button>            </div>        </div>    </div>
+    
+    <div id="newProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Новый проект</h2>
+            <form id="newProjectForm">
+                <div class="form-group">
+                    <label for="projectName">Название проекта:</label>
+                    <input type="text" id="projectName" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">Описание:</label>
+                    <textarea id="projectDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectTeam">Команда:</label>
+                    <select id="projectTeam">
+                        <option value="">Выберите команду</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать проект</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="newTeamModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Создание команды</h2>
+            <form id="newTeamForm">
+                <div class="form-group">
+                    <label for="teamName">Название команды:</label>
+                    <input type="text" id="teamName" required>
+                </div>
+                <div class="form-group">
+                    <label for="teamDescription">Описание:</label>
+                    <textarea id="teamDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Пригласить участников:</label>
+                    <div class="invite-members">
+                        <input type="email" placeholder="Email участника">
+                        <button type="button" class="btn btn-sm">Добавить</button>
+                    </div>
+                    <div class="invited-list" id="invitedMembers">
+                        <!-- Список приглашенных пользователей будет здесь -->
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать команду</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="newTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Новая задача</h2>
+            <form id="newTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Название задачи:</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Описание:</label>
+                    <textarea id="taskDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskProject">Проект:</label>
+                    <select id="taskProject">
+                        <option value="">Выберите проект</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskAssignee">Исполнитель:</label>
+                    <select id="taskAssignee">
+                        <option value="">Не назначено</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskDueDate">Срок выполнения:</label>
+                    <input type="date" id="taskDueDate">
+                </div>
+                <div class="form-group">
+                    <label for="taskPriority">Приоритет:</label>
+                    <select id="taskPriority">
+                        <option value="low">Низкий</option>
+                        <option value="medium" selected>Средний</option>
+                        <option value="high">Высокий</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать задачу</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html> 

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Authentication</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+        }
+        .card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+        }
+        .success {
+            color: #2ecc71;
+            font-size: 60px;
+            margin: 20px 0;
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 60px;
+            margin: 20px 0;
+        }
+        h1 {
+            margin-top: 0;
+        }
+        p {
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="success-card" style="display: none;">
+        <div class="success">✓</div>
+        <h1>Авторизация успешна!</h1>
+        <p>Вы успешно авторизовались через GitHub.</p>
+        <p>Сейчас вы будете перенаправлены в приложение...</p>
+    </div>
+    
+    <div class="card" id="error-card" style="display: none;">
+        <div class="error">✗</div>
+        <h1>Ошибка авторизации</h1>
+        <p id="error-message">Произошла ошибка при авторизации через GitHub.</p>
+        <a href="index.html" class="btn">Вернуться на главную</a>
+    </div>
+    
+    <script>
+        // Функция для получения параметров из URL
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search;
+            if (queryString) {
+                const urlParams = new URLSearchParams(queryString);
+                for (const [key, value] of urlParams.entries()) {
+                    params[key] = value;
+                }
+            }
+            return params;
+        }
+        
+        // Получаем параметры из URL
+        const params = getQueryParams();
+        
+        // Проверяем параметры
+        if (params.error) {
+            // Показываем ошибку
+            document.getElementById('error-card').style.display = 'block';
+            document.getElementById('error-message').textContent = 
+                `Ошибка: ${params.error}. ${params.error_description || ''}`;
+        } else if (params.code && params.state) {
+            // Проверяем state для защиты от CSRF
+            const savedState = localStorage.getItem('github_oauth_state');
+            
+            if (savedState && savedState === params.state) {
+                // Успешная авторизация
+                document.getElementById('success-card').style.display = 'block';
+                
+                // В реальном приложении здесь должен быть запрос к вашему серверу
+                // для обмена кода на токен доступа
+                
+                // Для демонстрации имитируем задержку и перенаправляем обратно
+                setTimeout(() => {
+                    localStorage.removeItem('github_oauth_state'); // Очищаем состояние
+                    window.location.href = 'index.html?auth=github_success';
+                }, 2000);
+            } else {
+                // Состояние не совпадает, возможная CSRF атака
+                document.getElementById('error-card').style.display = 'block';
+                document.getElementById('error-message').textContent = 
+                    'Ошибка: неверный параметр state. Возможная CSRF атака.';
+            }
+        } else {
+            // Отсутствуют необходимые параметры
+            document.getElementById('error-card').style.display = 'block';
+            document.getElementById('error-message').textContent = 
+                'Ошибка: отсутствуют необходимые параметры.';
+        }
+    </script>
+</body>
+</html> 

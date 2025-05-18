@@ -1,0 +1,83 @@
+@page "/projects"
+@inject OrionWasm.Services.ProjectService ProjectService
+@inject OrionWasm.Services.TeamService TeamService
+@inject OrionWasm.Services.UserService UserService
+@using OrionWasm.Models
+
+<h3>Проекты</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateModal">Создать проект</button>
+</div>
+
+@if (ProjectService.Projects.Count == 0)
+{
+    <div class="alert alert-info">У вас пока нет проектов.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var project in ProjectService.Projects)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@project.Name</h5>
+                        <p class="card-text">@project.Description</p>
+                        <p class="card-text"><small class="text-muted">Создан: @project.CreatedAt.ToShortDateString()</small></p>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProject(project.Id)">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новый проект</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-2" @bind="newProject.Name" placeholder="Название" />
+                    <input class="form-control mb-2" @bind="newProject.Description" placeholder="Описание" />
+                    <select class="form-select mb-2" @bind="newProject.TeamId">
+                        <option value="">Без команды</option>
+                        @foreach (var team in TeamService.Teams)
+                        {
+                            <option value="@team.Id">@team.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="CreateProject">Создать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    bool showModal = false;
+    Project newProject = new();
+
+    void ShowCreateModal() => showModal = true;
+    void HideCreateModal() => showModal = false;
+
+    void CreateProject()
+    {
+        newProject.Members = new List<int> { 1 };
+        ProjectService.AddProject(newProject);
+        newProject = new();
+        showModal = false;
+    }
+
+    void DeleteProject(int id)
+    {
+        ProjectService.RemoveProject(id);
+    }
+} 

@@ -1,0 +1,105 @@
+@page "/notes"
+@inject OrionWasm.Services.NoteService NoteService
+@using OrionWasm.Models
+
+<h3>Заметки</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateModal">Создать заметку</button>
+</div>
+
+@if (NoteService.Notes.Count == 0)
+{
+    <div class="alert alert-info">У вас пока нет заметок.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var note in NoteService.Notes.OrderByDescending(n => n.UpdatedAt))
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@note.Title</h5>
+                        <div class="card-text" style="min-height:60px" @onclick="() => ShowContent(note)">
+                            @((MarkupString)(note.Content?.Length > 100 ? note.Content.Substring(0, 100) + "..." : note.Content))
+                        </div>
+                        <p class="card-text"><small class="text-muted">Обновлено: @note.UpdatedAt.ToShortDateString()</small></p>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteNote(note.Id)">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новая заметка</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-2" @bind="newNote.Title" placeholder="Заголовок" />
+                    <textarea class="form-control mb-2" @bind="newNote.Content" placeholder="Текст заметки" rows="5"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="CreateNote">Создать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showContentModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedNote?.Title</h5>
+                    <button type="button" class="btn-close" @onclick="HideContent"></button>
+                </div>
+                <div class="modal-body">
+                    @if (selectedNote != null)
+                    {
+                        @((MarkupString)selectedNote.Content)
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    bool showModal = false;
+    bool showContentModal = false;
+    Note newNote = new();
+    Note? selectedNote;
+
+    void ShowCreateModal() => showModal = true;
+    void HideCreateModal() => showModal = false;
+
+    void CreateNote()
+    {
+        newNote.UserId = 1;
+        NoteService.AddNote(newNote);
+        newNote = new();
+        showModal = false;
+    }
+
+    void DeleteNote(int id)
+    {
+        NoteService.RemoveNote(id);
+    }
+
+    void ShowContent(Note note)
+    {
+        selectedNote = note;
+        showContentModal = true;
+    }
+    void HideContent() => showContentModal = false;
+} 

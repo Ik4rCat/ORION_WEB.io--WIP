@@ -1,0 +1,20 @@
+@using OrionWasm.Models
+
+<div class="card mb-2">
+    <div class="card-body">
+        <h6 class="card-title">@Task.Title</h6>
+        <p class="card-text">@Task.Description</p>
+        <span class="badge bg-secondary">@Task.Priority</span>
+        <span class="badge bg-light text-dark">@Task.Status</span>
+        @if (Task.DueDate != null)
+        {
+            <span class="badge bg-info text-dark">Срок: @Task.DueDate.Value.ToShortDateString()</span>
+        }
+        <button class="btn btn-danger btn-sm float-end" @onclick="() => OnDelete?.Invoke(Task.Id)">Удалить</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TaskItem Task { get; set; }
+    [Parameter] public Action<int>? OnDelete { get; set; }
+} 

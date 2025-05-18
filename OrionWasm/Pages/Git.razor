@@ -1,0 +1,75 @@
+@page "/git"
+@inject OrionWasm.Services.RepositoryService RepositoryService
+@using OrionWasm.Models
+
+<h3>Git-репозитории</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateModal">Добавить репозиторий</button>
+</div>
+
+@if (RepositoryService.Repositories.Count == 0)
+{
+    <div class="alert alert-info">У вас пока нет репозиториев.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var repo in RepositoryService.Repositories)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@repo.Name</h5>
+                        <p class="card-text">@repo.Url</p>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteRepository(repo.Id)">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить репозиторий</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-2" @bind="newRepo.Url" placeholder="URL или путь к репозиторию" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="CreateRepository">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    bool showModal = false;
+    Repository newRepo = new();
+
+    void ShowCreateModal() => showModal = true;
+    void HideCreateModal() => showModal = false;
+
+    void CreateRepository()
+    {
+        if (!string.IsNullOrWhiteSpace(newRepo.Url))
+        {
+            newRepo.Name = newRepo.Url.Split('/').Last().Replace(".git", "");
+            RepositoryService.AddRepository(newRepo);
+        }
+        newRepo = new();
+        showModal = false;
+    }
+
+    void DeleteRepository(int id)
+    {
+        RepositoryService.RemoveRepository(id);
+    }
+} 

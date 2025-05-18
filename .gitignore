@@ -1,0 +1,7 @@
+# Игнорировать старые html-файлы и статику
+index.html
+github-callback.html
+js/
+css/
+img/
+*.html 

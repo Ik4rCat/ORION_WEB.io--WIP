@@ -1,0 +1,115 @@
+@page "/tasks"
+@inject OrionWasm.Services.TaskService TaskService
+@inject OrionWasm.Services.ProjectService ProjectService
+@inject OrionWasm.Services.UserService UserService
+@using OrionWasm.Models
+
+<h3>Задачи (Kanban)</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateModal">Создать задачу</button>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <h5>Запланировано</h5>
+        @foreach (var task in TaskService.Tasks.Where(t => t.Status == "planned"))
+        {
+            <TaskCard Task="task" OnDelete="DeleteTask" />
+        }
+    </div>
+    <div class="col-md-3">
+        <h5>В работе</h5>
+        @foreach (var task in TaskService.Tasks.Where(t => t.Status == "in-progress"))
+        {
+            <TaskCard Task="task" OnDelete="DeleteTask" />
+        }
+    </div>
+    <div class="col-md-3">
+        <h5>Тестирование</h5>
+        @foreach (var task in TaskService.Tasks.Where(t => t.Status == "testing"))
+        {
+            <TaskCard Task="task" OnDelete="DeleteTask" />
+        }
+    </div>
+    <div class="col-md-3">
+        <h5>Завершено</h5>
+        @foreach (var task in TaskService.Tasks.Where(t => t.Status == "completed"))
+        {
+            <TaskCard Task="task" OnDelete="DeleteTask" />
+        }
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новая задача</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-2" @bind="newTask.Title" placeholder="Заголовок" />
+                    <input class="form-control mb-2" @bind="newTask.Description" placeholder="Описание" />
+                    <select class="form-select mb-2" @bind="newTask.ProjectId">
+                        <option value="">Без проекта</option>
+                        @foreach (var project in ProjectService.Projects)
+                        {
+                            <option value="@project.Id">@project.Name</option>
+                        }
+                    </select>
+                    <select class="form-select mb-2" @bind="newTask.Priority">
+                        <option value="low">Низкий</option>
+                        <option value="medium">Средний</option>
+                        <option value="high">Высокий</option>
+                    </select>
+                    <input class="form-control mb-2" type="date" value="@dateString" @onchange="OnDateChanged" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="CreateTask">Создать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    bool showModal = false;
+    TaskItem newTask = new() { Priority = "medium", Status = "planned" };
+    string? dateString;
+
+    void ShowCreateModal() => showModal = true;
+    void HideCreateModal() => showModal = false;
+
+    void CreateTask()
+    {
+        if (!string.IsNullOrWhiteSpace(dateString))
+        {
+            if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var dt))
+                newTask.DueDate = dt;
+            else
+                newTask.DueDate = null;
+        }
+        else
+        {
+            newTask.DueDate = null;
+        }
+        newTask.CreatedBy = 1;
+        TaskService.AddTask(newTask);
+        newTask = new() { Priority = "medium", Status = "planned" };
+        dateString = null;
+        showModal = false;
+    }
+
+    void DeleteTask(int id)
+    {
+        TaskService.RemoveTask(id);
+    }
+
+    void OnDateChanged(ChangeEventArgs e)
+    {
+        dateString = e.Value?.ToString();
+    }
+} 

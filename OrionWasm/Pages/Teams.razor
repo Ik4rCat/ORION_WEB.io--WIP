@@ -1,0 +1,75 @@
+@page "/teams"
+@inject OrionWasm.Services.TeamService TeamService
+@using OrionWasm.Models
+
+<h3>Команды</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateModal">Создать команду</button>
+</div>
+
+@if (TeamService.Teams.Count == 0)
+{
+    <div class="alert alert-info">У вас пока нет команд.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var team in TeamService.Teams)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@team.Name</h5>
+                        <p class="card-text">@team.Description</p>
+                        <p class="card-text"><small class="text-muted">Создана: @team.CreatedAt.ToShortDateString()</small></p>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteTeam(team.Id)">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.3)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новая команда</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-2" @bind="newTeam.Name" placeholder="Название" />
+                    <input class="form-control mb-2" @bind="newTeam.Description" placeholder="Описание" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="CreateTeam">Создать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    bool showModal = false;
+    Team newTeam = new();
+
+    void ShowCreateModal() => showModal = true;
+    void HideCreateModal() => showModal = false;
+
+    void CreateTeam()
+    {
+        newTeam.Members = new List<int> { 1 };
+        newTeam.CreatedBy = 1;
+        TeamService.AddTeam(newTeam);
+        newTeam = new();
+        showModal = false;
+    }
+
+    void DeleteTeam(int id)
+    {
+        TeamService.RemoveTeam(id);
+    }
+} 

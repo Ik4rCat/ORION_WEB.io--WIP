@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initModals();
     initForms();
     initDragAndDrop();
+    initDashboardButtons();
     
     // Проверяем авторизацию
     checkAuth();
@@ -345,14 +346,8 @@ function loginWithGitHub() {
     // Создаем URL для авторизации
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
     
-    // Для демо-версии вместо реального перехода покажем сообщение
-    if (confirm('В рабочей версии здесь произойдет перенаправление на GitHub для авторизации. Продолжить с эмуляцией?')) {
-        // Эмуляция успешной авторизации через GitHub
-        simulateGitHubAuth('login');
-    }
-    
-    // В реальном приложении:
-    // window.location.href = authUrl;
+    // Реальное перенаправление на GitHub OAuth
+    window.location.href = authUrl;
 }
 
 function registerWithGitHub() {
@@ -449,9 +444,17 @@ function updateProjectsUI() {
             <div class="project-card empty-state">
                 <i class="fas fa-folder-open"></i>
                 <p>У вас пока нет проектов</p>
-                <button class="btn btn-primary" onclick="openModal('newProjectModal')">Создать первый проект</button>
+                <button class="btn btn-primary">Создать первый проект</button>
             </div>
         `;
+        // Навешиваем обработчик на кнопку после вставки
+        const createBtn = projectsGrid.querySelector('.empty-state .btn');
+        if (createBtn) {
+            createBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal('newProjectModal');
+            });
+        }
     } else {
         // Показываем список проектов
         projects.forEach(project => {
@@ -926,4 +929,36 @@ function getPriorityText(priority) {
     };
     
     return priorities[priority] || 'Средний';
+}
+
+function initDashboardButtons() {
+    // Перейти к задачам
+    $('#dashboard .card:nth-child(1) .btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchSection('tasks');
+    });
+    // Перейти к проектам
+    $('#dashboard .card:nth-child(2) .btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchSection('projects');
+    });
+    // Перейти к заметкам
+    $('#dashboard .card:nth-child(3) .btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchSection('notes');
+    });
+    // Перейти к Git
+    $('#dashboard .card:nth-child(4) .btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchSection('git');
+    });
+}
+
+
+function switchSection(sectionId) {
+    $$('.section').forEach(section => section.classList.remove('active'));
+    $$('.main-nav a').forEach(link => link.classList.remove('active'));
+    $(`#${sectionId}`).classList.add('active');
+    const navLink = $(`#${sectionId}Link`);
+    if (navLink) navLink.classList.add('active'); 
 } 
